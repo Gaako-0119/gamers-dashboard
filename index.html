@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>マイゲームダッシュボード | Portfolio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              neon: {
+                green: "#4ade80",
+                pink: "#f472b6",
+                cyan: "#22d3ee",
+                purple: "#a855f7",
+              },
+            },
+            boxShadow: {
+              "neon-green": "0 0 20px rgba(74, 222, 128, 0.6)",
+              "neon-pink": "0 0 20px rgba(244, 114, 182, 0.6)",
+              "neon-cyan": "0 0 20px rgba(34, 211, 238, 0.6)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="min-h-screen bg-gradient-to-br from-gray-950 via-black to-slate-900 text-gray-100">
+    <div class="min-h-screen flex flex-col">
+      <!-- Header -->
+      <header
+        class="border-b border-slate-800/80 bg-gradient-to-r from-slate-950 via-slate-900 to-black/90 backdrop-blur px-4 sm:px-8 py-4 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="h-9 w-9 rounded-lg bg-gradient-to-br from-neon-green via-neon-cyan to-neon-purple shadow-neon-cyan flex items-center justify-center"
+          >
+            <span class="font-bold text-xs tracking-widest text-black">GTD</span>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-semibold tracking-tight">
+            マイゲームダッシュボード
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-400">
+              積みゲーとソシャゲ日課を一括管理するダッシュボード
+            </p>
+          </div>
+        </div>
+        <div class="hidden sm:flex items-center gap-3 text-xs text-slate-400">
+          <span class="px-2 py-0.5 rounded-full border border-slate-700/70 bg-slate-900/70">
+            Web Engineer Portfolio
+          </span>
+          <span class="px-2 py-0.5 rounded-full border border-neon-cyan/40 text-neon-cyan">
+            LocalStorage 保存対応
+          </span>
+        </div>
+      </header>
+
+      <!-- Main Layout -->
+      <main class="flex-1 px-4 sm:px-8 py-6">
+        <div
+          class="grid gap-6 lg:gap-8 lg:grid-cols-2"
+        >
+          <!-- Backlog Panel -->
+          <section
+            class="relative border border-slate-800/80 bg-gradient-to-br from-slate-950 via-slate-900 to-black/90 rounded-2xl p-4 sm:p-6 shadow-[0_0_40px_rgba(15,23,42,0.9)] overflow-hidden"
+          >
+            <div
+              class="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-neon-purple/10 blur-3xl"
+            ></div>
+            <header class="relative flex items-center justify-between mb-4 sm:mb-5">
+              <div>
+                <h2 class="text-base sm:text-lg font-semibold flex items-center gap-2">
+                  <span
+                    class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-tr from-neon-green to-neon-cyan text-xs font-bold text-black shadow-neon-green"
+                    >B</span
+                  >
+                  積みゲー管理（Backlog）
+                </h2>
+                <p class="mt-1 text-xs text-slate-400">
+                  積みゲーのタイトル・ハード・ステータスを登録して整理しましょう。
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  BACKLOG
+                </p>
+                <p id="backlog-count" class="text-xs text-neon-green font-semibold">
+                  0 Games
+                </p>
+              </div>
+            </header>
+
+            <!-- Backlog Form -->
+            <form
+              id="backlog-form"
+              class="relative mb-4 sm:mb-5 space-y-3 sm:space-y-4 bg-slate-900/60 border border-slate-800 rounded-xl p-3 sm:p-4"
+            >
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div class="sm:col-span-5">
+                  <label class="block text-[11px] text-slate-400 mb-1">ゲームタイトル</label>
+                  <input
+                    id="game-title"
+                    type="text"
+                    required
+                    placeholder="例：ELDEN RING"
+                    class="w-full rounded-lg bg-black/60 border border-slate-700/80 focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan text-xs sm:text-sm px-3 py-2 outline-none placeholder:text-slate-500"
+                  />
+                </div>
+                <div class="sm:col-span-3">
+                  <label class="block text-[11px] text-slate-400 mb-1">ハード</label>
+                  <select
+                    id="game-platform"
+                    class="w-full rounded-lg bg-black/60 border border-slate-700/80 focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan text-xs sm:text-sm px-3 py-2 outline-none"
+                  >
+                    <option value="PS5">PS5</option>
+                    <option value="Switch">Switch</option>
+                    <option value="Steam">Steam</option>
+                    <option value="Xbox">Xbox</option>
+                    <option value="Mobile">Mobile</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="sm:col-span-3">
+                  <label class="block text-[11px] text-slate-400 mb-1">ステータス</label>
+                  <select
+                    id="game-status"
+                    class="w-full rounded-lg bg-black/60 border border-slate-700/80 focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan text-xs sm:text-sm px-3 py-2 outline-none"
+                  >
+                    <option value="未プレイ">未プレイ</option>
+                    <option value="プレイ中">プレイ中</option>
+                    <option value="クリア">クリア</option>
+                  </select>
+                </div>
+                <div class="sm:col-span-1 flex items-end">
+                  <button
+                    type="submit"
+                    class="w-full inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-neon-green to-neon-cyan text-black text-xs sm:text-sm font-semibold py-2 shadow-neon-green hover:brightness-110 transition"
+                  >
+                    追加
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <!-- Backlog List -->
+            <div
+              class="relative max-h-[380px] sm:max-h-[420px] overflow-y-auto pr-1 space-y-2 custom-scroll"
+              id="backlog-list"
+            ></div>
+
+            <template id="backlog-item-template">
+              <div
+                class="group flex items-center justify-between gap-3 rounded-lg border border-slate-800/80 bg-slate-900/70 px-3 py-2.5 text-xs sm:text-sm hover:border-neon-cyan/60 transition"
+              >
+                <div class="flex-1 min-w-0">
+                  <p class="font-medium truncate text-slate-100 game-title"></p>
+                  <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
+                    <span
+                      class="inline-flex items-center rounded-full border border-slate-700/80 px-2 py-0.5 platform-pill"
+                    ></span>
+                    <span
+                      class="inline-flex items-center rounded-full border border-neon-purple/60 bg-neon-purple/10 px-2 py-0.5 status-pill text-neon-purple text-[10px] font-semibold"
+                    ></span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="shrink-0 rounded-md border border-red-500/70 text-red-400 px-2 py-1 text-[11px] hover:bg-red-500/10 transition delete-btn"
+                >
+                  削除
+                </button>
+              </div>
+            </template>
+          </section>
+
+          <!-- Daily Routine Panel -->
+          <section
+            class="relative border border-slate-800/80 bg-gradient-to-br from-slate-950 via-slate-900 to-black/90 rounded-2xl p-4 sm:p-6 shadow-[0_0_40px_rgba(8,47,73,0.9)] overflow-hidden"
+          >
+            <div
+              class="pointer-events-none absolute -left-20 -bottom-24 h-64 w-64 rounded-full bg-neon-cyan/10 blur-3xl"
+            ></div>
+            <header class="relative flex items-center justify-between mb-4 sm:mb-5">
+              <div>
+                <h2 class="text-base sm:text-lg font-semibold flex items-center gap-2">
+                  <span
+                    class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-tr from-neon-pink to-neon-purple text-xs font-bold text-black shadow-neon-pink"
+                    >D</span
+                  >
+                  ソシャゲ日課チェック（Daily Routine）
+                </h2>
+                <p class="mt-1 text-xs text-slate-400">
+                  ログボ・周回などの毎日タスクをチェックリストで管理します。
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  DAILY
+                </p>
+                <p id="daily-progress" class="text-xs text-neon-pink font-semibold">
+                  0 / 0 Done
+                </p>
+              </div>
+            </header>
+
+            <!-- Daily Form -->
+            <form
+              id="daily-form"
+              class="relative mb-4 sm:mb-5 space-y-3 sm:space-y-4 bg-slate-900/60 border border-slate-800 rounded-xl p-3 sm:p-4"
+            >
+              <div class="grid grid-cols-1 sm:grid-cols-10 gap-3">
+                <div class="sm:col-span-4">
+                  <label class="block text-[11px] text-slate-400 mb-1">ゲーム名</label>
+                  <input
+                    id="daily-game"
+                    type="text"
+                    required
+                    placeholder="例：FGO"
+                    class="w-full rounded-lg bg-black/60 border border-slate-700/80 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink text-xs sm:text-sm px-3 py-2 outline-none placeholder:text-slate-500"
+                  />
+                </div>
+                <div class="sm:col-span-5">
+                  <label class="block text-[11px] text-slate-400 mb-1">日課内容</label>
+                  <input
+                    id="daily-task"
+                    type="text"
+                    required
+                    placeholder="例：ログボ、デイリーミッション、スタミナ消化 など"
+                    class="w-full rounded-lg bg-black/60 border border-slate-700/80 focus:border-neon-pink focus:ring-1 focus:ring-neon-pink text-xs sm:text-sm px-3 py-2 outline-none placeholder:text-slate-500"
+                  />
+                </div>
+                <div class="sm:col-span-1 flex items-end gap-2">
+                  <button
+                    type="submit"
+                    class="w-full inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-neon-pink to-neon-purple text-black text-xs sm:text-sm font-semibold py-2 shadow-neon-pink hover:brightness-110 transition"
+                  >
+                    追加
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="text-[11px] text-slate-500">
+                  チェック状態は自動保存され、ブラウザを閉じても維持されます。
+                </p>
+                <button
+                  type="button"
+                  id="reset-daily"
+                  class="inline-flex items-center gap-1 rounded-md border border-slate-700/80 bg-black/60 px-3 py-1.5 text-[11px] text-slate-200 hover:border-neon-cyan/70 hover:text-neon-cyan hover:bg-slate-900/80 transition"
+                >
+                  <span class="h-1.5 w-1.5 rounded-full bg-neon-cyan shadow-neon-cyan"></span>
+                  日付変更リセット
+                </button>
+              </div>
+            </form>
+
+            <!-- Daily List -->
+            <div
+              class="relative max-h-[380px] sm:max-h-[420px] overflow-y-auto pr-1 space-y-2 custom-scroll"
+              id="daily-list"
+            ></div>
+
+            <template id="daily-item-template">
+              <label
+                class="group flex items-center gap-3 rounded-lg border border-slate-800/80 bg-slate-900/70 px-3 py-2.5 text-xs sm:text-sm hover:border-neon-pink/60 transition cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-slate-700/80 bg-black/80 text-neon-pink focus:ring-neon-pink focus:ring-offset-0"
+                />
+                <div class="flex-1 min-w-0">
+                  <p class="font-medium truncate text-slate-100 daily-game"></p>
+                  <p class="mt-1 text-[11px] text-slate-400 truncate daily-task"></p>
+                </div>
+                <button
+                  type="button"
+                  class="shrink-0 rounded-md border border-slate-700/80 text-slate-400 px-2 py-1 text-[11px] hover:border-red-500/70 hover:text-red-400 hover:bg-red-500/5 transition delete-btn"
+                >
+                  削除
+                </button>
+              </label>
+            </template>
+          </section>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="border-t border-slate-800/80 px-4 sm:px-8 py-3 text-[11px] sm:text-xs text-slate-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <p>Designed as a <span class="text-neon-cyan">Web Engineer Portfolio</span> – Gamer向けタスク管理ダッシュボード</p>
+        <p class="text-slate-600">
+          Data is stored locally in your browser via <span class="text-slate-300">localStorage</span>.
+        </p>
+      </footer>
+    </div>
+
+    <style>
+      .custom-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(148, 163, 184, 0.7) transparent;
+      }
+      .custom-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.6);
+        border-radius: 999px;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(148, 163, 184, 0.9);
+      }
+    </style>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
+
