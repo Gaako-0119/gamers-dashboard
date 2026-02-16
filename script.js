@@ -4,30 +4,27 @@ const STORAGE_KEYS = {
   daily: "gamer_dashboard_daily",
 };
 
+// ----- ステータスごとのスタイル定義（色変更はここだけ編集すればOK） -----
+const STATUS_STYLES = {
+  未プレイ: ["border-slate-600/80", "bg-slate-700/20", "text-slate-200"],
+  プレイ中: ["border-neon-purple/60", "bg-neon-purple/10", "text-neon-purple"],
+  クリア: ["border-neon-green/70", "bg-neon-green/10", "text-neon-green"],
+};
+
+// 全ステータスのクラスをまとめた配列（remove用）
+const ALL_STATUS_CLASSES = Object.values(STATUS_STYLES).flat();
+
 // ----- Utility: Save & Load -----
-function saveBacklog(backlog) {
-  localStorage.setItem(STORAGE_KEYS.backlog, JSON.stringify(backlog));
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
 }
 
-function loadBacklog() {
-  const raw = localStorage.getItem(STORAGE_KEYS.backlog);
+function loadData(key, defaultValue = []) {
+  const raw = localStorage.getItem(key);
   try {
-    return raw ? JSON.parse(raw) : [];
+    return raw ? JSON.parse(raw) : defaultValue;
   } catch {
-    return [];
-  }
-}
-
-function saveDaily(daily) {
-  localStorage.setItem(STORAGE_KEYS.daily, JSON.stringify(daily));
-}
-
-function loadDaily() {
-  const raw = localStorage.getItem(STORAGE_KEYS.daily);
-  try {
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
+    return defaultValue;
   }
 }
 
@@ -43,8 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const resetDailyBtn = document.getElementById("reset-daily");
 
-  let backlogItems = loadBacklog();
-  let dailyItems = loadDaily();
+  let backlogItems = loadData(STORAGE_KEYS.backlog);
+  let dailyItems = loadData(STORAGE_KEYS.daily);
 
   function renderBacklog() {
     backlogList.innerHTML = "";
@@ -57,42 +54,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const statusEl = clone.querySelector(".status-pill");
       statusEl.textContent = item.status;
 
-      // ステータス別に色を変える
-      statusEl.classList.remove(
-        "border-neon-purple/60",
-        "bg-neon-purple/10",
-        "text-neon-purple",
-        "border-neon-green/70",
-        "bg-neon-green/10",
-        "text-neon-green",
-        "border-slate-600/80",
-        "bg-slate-700/20",
-        "text-slate-200"
-      );
-
-      if (item.status === "未プレイ") {
-        statusEl.classList.add(
-          "border-slate-600/80",
-          "bg-slate-700/20",
-          "text-slate-200"
-        );
-      } else if (item.status === "プレイ中") {
-        statusEl.classList.add(
-          "border-neon-purple/60",
-          "bg-neon-purple/10",
-          "text-neon-purple"
-        );
-      } else if (item.status === "クリア") {
-        statusEl.classList.add(
-          "border-neon-green/70",
-          "bg-neon-green/10",
-          "text-neon-green"
-        );
-      }
+      // ステータス別に色を変える（STATUS_STYLESを参照）
+      statusEl.classList.remove(...ALL_STATUS_CLASSES);
+      const classes = STATUS_STYLES[item.status] ?? STATUS_STYLES["未プレイ"];
+      statusEl.classList.add(...classes);
 
       clone.querySelector(".delete-btn").addEventListener("click", () => {
         backlogItems.splice(index, 1);
-        saveBacklog(backlogItems);
+        saveData(STORAGE_KEYS.backlog, backlogItems);
         renderBacklog();
       });
 
@@ -111,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!title) return;
 
     backlogItems.push({ title, platform, status });
-    saveBacklog(backlogItems);
+    saveData(STORAGE_KEYS.backlog, backlogItems);
     backlogForm.reset();
     renderBacklog();
   });
@@ -155,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       checkbox.addEventListener("change", () => {
         dailyItems[index].done = checkbox.checked;
-        saveDaily(dailyItems);
+        saveData(STORAGE_KEYS.daily, dailyItems);
         applyDoneStyle();
         updateDailyProgress();
       });
@@ -163,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
       deleteBtn.addEventListener("click", (event) => {
         event.stopPropagation();
         dailyItems.splice(index, 1);
-        saveDaily(dailyItems);
+        saveData(STORAGE_KEYS.daily, dailyItems);
         renderDaily();
         updateDailyProgress();
       });
@@ -180,14 +149,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const task = document.getElementById("daily-task").value.trim();
     if (!game || !task) return;
     dailyItems.push({ game, task, done: false });
-    saveDaily(dailyItems);
+    saveData(STORAGE_KEYS.daily, dailyItems);
     dailyForm.reset();
     renderDaily();
   });
 
   resetDailyBtn.addEventListener("click", () => {
     dailyItems = dailyItems.map((item) => ({ ...item, done: false }));
-    saveDaily(dailyItems);
+    saveData(STORAGE_KEYS.daily, dailyItems);
     renderDaily();
   });
 
