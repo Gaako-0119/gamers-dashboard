@@ -43,6 +43,24 @@ document.addEventListener("DOMContentLoaded", () => {
   let backlogItems = loadData(STORAGE_KEYS.backlog);
   let dailyItems = loadData(STORAGE_KEYS.daily);
 
+  let editingBacklogIndex = -1;
+  let editingDailyIndex = -1;
+
+  const backlogSubmitBtn = backlogForm.querySelector('button[type="submit"]');
+  const dailySubmitBtn = dailyForm.querySelector('button[type="submit"]');
+
+  function resetBacklogFormToAdd() {
+    editingBacklogIndex = -1;
+    backlogForm.reset();
+    backlogSubmitBtn.textContent = "追加";
+  }
+
+  function resetDailyFormToAdd() {
+    editingDailyIndex = -1;
+    dailyForm.reset();
+    dailySubmitBtn.textContent = "追加";
+  }
+
   function renderBacklog() {
     backlogList.innerHTML = "";
     const template = document.getElementById("backlog-item-template");
@@ -59,10 +77,21 @@ document.addEventListener("DOMContentLoaded", () => {
       const classes = STATUS_STYLES[item.status] ?? STATUS_STYLES["未プレイ"];
       statusEl.classList.add(...classes);
 
+      clone.querySelector(".edit-btn").addEventListener("click", () => {
+        const item = backlogItems[index];
+        document.getElementById("game-title").value = item.title;
+        document.getElementById("game-platform").value = item.platform;
+        document.getElementById("game-status").value = item.status;
+        backlogSubmitBtn.textContent = "更新";
+        editingBacklogIndex = index;
+      });
+
       clone.querySelector(".delete-btn").addEventListener("click", () => {
         backlogItems.splice(index, 1);
         saveData(STORAGE_KEYS.backlog, backlogItems);
         renderBacklog();
+        if (editingBacklogIndex === index) resetBacklogFormToAdd();
+        else if (editingBacklogIndex > index) editingBacklogIndex--;
       });
 
       backlogList.appendChild(clone);
@@ -79,9 +108,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!title) return;
 
-    backlogItems.push({ title, platform, status });
-    saveData(STORAGE_KEYS.backlog, backlogItems);
-    backlogForm.reset();
+    if (editingBacklogIndex >= 0) {
+      backlogItems[editingBacklogIndex] = { title, platform, status };
+      saveData(STORAGE_KEYS.backlog, backlogItems);
+      resetBacklogFormToAdd();
+    } else {
+      backlogItems.push({ title, platform, status });
+      saveData(STORAGE_KEYS.backlog, backlogItems);
+      backlogForm.reset();
+    }
     renderBacklog();
   });
 
@@ -129,12 +164,24 @@ document.addEventListener("DOMContentLoaded", () => {
         updateDailyProgress();
       });
 
+      const editBtn = clone.querySelector(".edit-btn");
+      editBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const item = dailyItems[index];
+        document.getElementById("daily-game").value = item.game;
+        document.getElementById("daily-task").value = item.task;
+        dailySubmitBtn.textContent = "更新";
+        editingDailyIndex = index;
+      });
+
       deleteBtn.addEventListener("click", (event) => {
         event.stopPropagation();
         dailyItems.splice(index, 1);
         saveData(STORAGE_KEYS.daily, dailyItems);
         renderDaily();
         updateDailyProgress();
+        if (editingDailyIndex === index) resetDailyFormToAdd();
+        else if (editingDailyIndex > index) editingDailyIndex--;
       });
 
       dailyList.appendChild(clone);
@@ -148,15 +195,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const game = document.getElementById("daily-game").value.trim();
     const task = document.getElementById("daily-task").value.trim();
     if (!game || !task) return;
-    dailyItems.push({ game, task, done: false });
-    saveData(STORAGE_KEYS.daily, dailyItems);
-    dailyForm.reset();
+
+    if (editingDailyIndex >= 0) {
+      dailyItems[editingDailyIndex] = {
+        ...dailyItems[editingDailyIndex],
+        game,
+        task,
+      };
+      saveData(STORAGE_KEYS.daily, dailyItems);
+      resetDailyFormToAdd();
+    } else {
+      dailyItems.push({ game, task, done: false });
+      saveData(STORAGE_KEYS.daily, dailyItems);
+      dailyForm.reset();
+    }
     renderDaily();
   });
 
   resetDailyBtn.addEventListener("click", () => {
     dailyItems = dailyItems.map((item) => ({ ...item, done: false }));
     saveData(STORAGE_KEYS.daily, dailyItems);
+    if (editingDailyIndex >= 0) resetDailyFormToAdd();
     renderDaily();
   });
 
