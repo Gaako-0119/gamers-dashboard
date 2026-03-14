@@ -34,6 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const backlogList = document.getElementById("backlog-list");
   const backlogCount = document.getElementById("backlog-count");
 
+  const filterPlatform = document.getElementById("filter-platform");
+  const filterStatus = document.getElementById("filter-status");
+  const sortOrder = document.getElementById("sort-order");
+
   const dailyForm = document.getElementById("daily-form");
   const dailyList = document.getElementById("daily-list");
   const dailyProgress = document.getElementById("daily-progress");
@@ -61,11 +65,61 @@ document.addEventListener("DOMContentLoaded", () => {
     dailySubmitBtn.textContent = "追加";
   }
 
+  // フィルター・ソート後のバックログ配列を計算する（DOMは触らない純粋な加工ロジック）
+  function getProcessedBacklogItems() {
+    const platformValue = filterPlatform.value;
+    const statusValue = filterStatus.value;
+    const sortValue = sortOrder.value;
+
+    // 元配列のインデックスを保持した作業用配列を生成
+    let working = backlogItems.map((item, index) => ({ item, originalIndex: index }));
+
+    // ハードでフィルタリング
+    if (platformValue !== "All") {
+      working = working.filter(({ item }) => item.platform === platformValue);
+    }
+
+    // ステータスでフィルタリング
+    if (statusValue !== "All") {
+      working = working.filter(({ item }) => item.status === statusValue);
+    }
+
+    // 並び替え
+    if (sortValue === "newest") {
+      working.sort((a, b) => b.originalIndex - a.originalIndex);
+    } else if (sortValue === "oldest") {
+      working.sort((a, b) => a.originalIndex - b.originalIndex);
+    } else if (sortValue === "title") {
+      working.sort((a, b) =>
+        a.item.title.localeCompare(b.item.title, "ja", {
+          sensitivity: "base",
+          numeric: true,
+        })
+      );
+    }
+
+    return working;
+  }
+
+  function handleBacklogFilterChange() {
+    if (editingBacklogIndex >= 0) {
+      resetBacklogFormToAdd();
+    }
+    renderBacklog();
+  }
+
+  // フィルター・ソートのイベント設定
+  filterPlatform.addEventListener("change", handleBacklogFilterChange);
+  filterStatus.addEventListener("change", handleBacklogFilterChange);
+  sortOrder.addEventListener("change", handleBacklogFilterChange);
+
   function renderBacklog() {
+    const working = getProcessedBacklogItems();
+
     backlogList.innerHTML = "";
     const template = document.getElementById("backlog-item-template");
 
-    backlogItems.forEach((item, index) => {
+    working.forEach(({ item, originalIndex }) => {
       const clone = template.content.cloneNode(true);
       clone.querySelector(".game-title").textContent = item.title;
       clone.querySelector(".platform-pill").textContent = item.platform;
@@ -78,26 +132,30 @@ document.addEventListener("DOMContentLoaded", () => {
       statusEl.classList.add(...classes);
 
       clone.querySelector(".edit-btn").addEventListener("click", () => {
-        const item = backlogItems[index];
-        document.getElementById("game-title").value = item.title;
-        document.getElementById("game-platform").value = item.platform;
-        document.getElementById("game-status").value = item.status;
+        const target = backlogItems[originalIndex];
+        document.getElementById("game-title").value = target.title;
+        document.getElementById("game-platform").value = target.platform;
+        document.getElementById("game-status").value = target.status;
         backlogSubmitBtn.textContent = "更新";
-        editingBacklogIndex = index;
+        editingBacklogIndex = originalIndex;
       });
 
       clone.querySelector(".delete-btn").addEventListener("click", () => {
-        backlogItems.splice(index, 1);
+        backlogItems.splice(originalIndex, 1);
         saveData(STORAGE_KEYS.backlog, backlogItems);
         renderBacklog();
-        if (editingBacklogIndex === index) resetBacklogFormToAdd();
-        else if (editingBacklogIndex > index) editingBacklogIndex--;
+        if (editingBacklogIndex === originalIndex) {
+          resetBacklogFormToAdd();
+        } else if (editingBacklogIndex > originalIndex) {
+          editingBacklogIndex--;
+        }
       });
 
       backlogList.appendChild(clone);
     });
 
-    backlogCount.textContent = `${backlogItems.length} Games`;
+    // フィルタ後の件数を表示
+    backlogCount.textContent = `${working.length} Games`;
   }
 
   backlogForm.addEventListener("submit", (e) => {
@@ -115,6 +173,10 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       backlogItems.push({ title, platform, status });
       saveData(STORAGE_KEYS.backlog, backlogItems);
+      // 追加時はフィルターを初期状態に戻して、新規アイテムが必ず表示されるようにする
+      filterPlatform.value = "All";
+      filterStatus.value = "All";
+      sortOrder.value = "newest";
       backlogForm.reset();
     }
     renderBacklog();

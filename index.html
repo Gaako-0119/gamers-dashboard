@@ -146,6 +146,50 @@
               </div>
             </form>
 
+            <!-- Backlog Filter & Sort Controls -->
+            <div
+              class="relative mb-3 sm:mb-4 flex flex-wrap items-center gap-2 sm:gap-3 bg-slate-900/60 border border-slate-800 rounded-xl px-3 py-2.5 text-[11px] sm:text-xs"
+            >
+              <div class="flex items-center gap-1 sm:gap-2">
+                <span class="text-slate-400 whitespace-nowrap">ハード</span>
+                <select
+                  id="filter-platform"
+                  class="rounded-md bg-black/60 border border-slate-700/80 focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan px-2 py-1 text-[11px] sm:text-xs outline-none"
+                >
+                  <option value="All">All</option>
+                  <option value="PS5">PS5</option>
+                  <option value="Switch">Switch</option>
+                  <option value="Steam">Steam</option>
+                  <option value="Xbox">Xbox</option>
+                  <option value="Mobile">Mobile</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-1 sm:gap-2">
+                <span class="text-slate-400 whitespace-nowrap">ステータス</span>
+                <select
+                  id="filter-status"
+                  class="rounded-md bg-black/60 border border-slate-700/80 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple px-2 py-1 text-[11px] sm:text-xs outline-none"
+                >
+                  <option value="All">All</option>
+                  <option value="未プレイ">未プレイ</option>
+                  <option value="プレイ中">プレイ中</option>
+                  <option value="クリア">クリア</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-1 sm:gap-2 ml-auto">
+                <span class="text-slate-400 whitespace-nowrap">並び替え</span>
+                <select
+                  id="sort-order"
+                  class="rounded-md bg-black/60 border border-slate-700/80 focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan px-2 py-1 text-[11px] sm:text-xs outline-none"
+                >
+                  <option value="newest">新しい順</option>
+                  <option value="oldest">古い順</option>
+                  <option value="title">タイトル順</option>
+                </select>
+              </div>
+            </div>
+
             <!-- Backlog List -->
             <div
               class="relative max-h-[380px] sm:max-h-[420px] overflow-y-auto pr-1 space-y-2 custom-scroll"
